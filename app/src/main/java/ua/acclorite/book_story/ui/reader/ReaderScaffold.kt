@@ -111,6 +111,7 @@ fun ReaderScaffold(
     openDictionary: (ReaderEvent.OnOpenDictionary) -> Unit,
     showSettingsBottomSheet: (ReaderEvent.OnShowSettingsBottomSheet) -> Unit,
     showChaptersDrawer: (ReaderEvent.OnShowChaptersDrawer) -> Unit,
+    scrollToChapter: (ReaderEvent.OnScrollToChapter) -> Unit,
     navigateToBookInfo: (ReaderEvent.OnNavigateToBookInfo) -> Unit,
     navigateBack: (ReaderEvent.OnNavigateBack) -> Unit
 ) {
@@ -150,15 +151,16 @@ fun ReaderScaffold(
             ) {
                 ReaderBottomBar(
                     book = book,
-                    progress = progress,
                     text = text,
+                    currentChapter = currentChapter,
                     listState = listState,
                     lockMenu = lockMenu,
                     checkpoints = checkpoints,
                     bottomBarPadding = bottomBarPadding,
                     restoreCheckpoint = restoreCheckpoint,
                     scroll = scroll,
-                    changeProgress = changeProgress
+                    changeProgress = changeProgress,
+                    scrollToChapter = scrollToChapter
                 )
             }
         }

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.outlined.Delete
@@ -77,7 +78,8 @@ fun LibraryTopBar(
     clearSelectedBooks: (LibraryEvent.OnClearSelectedBooks) -> Unit,
     showMoveDialog: (LibraryEvent.OnShowMoveDialog) -> Unit,
     showDeleteDialog: (LibraryEvent.OnShowDeleteDialog) -> Unit,
-    showFilterBottomSheet: (LibraryEvent.OnShowFilterBottomSheet) -> Unit
+    showFilterBottomSheet: (LibraryEvent.OnShowFilterBottomSheet) -> Unit,
+    navigateToOpdsLibrary: (LibraryEvent.OnNavigateToOpdsLibrary) -> Unit
 ) {
     val defaultCategory = stringResource(id = R.string.default_tab)
     val categoriesWithBooks = remember(
@@ -157,6 +159,13 @@ fun LibraryTopBar(
                     }
                 },
                 contentActions = {
+                    IconButton(
+                        icon = Icons.Default.Language,
+                        contentDescription = R.string.opds_library_content_desc,
+                        disableOnClick = false,
+                    ) {
+                        navigateToOpdsLibrary(LibraryEvent.OnNavigateToOpdsLibrary)
+                    }
                     IconButton(
                         icon = Icons.Default.Search,
                         contentDescription = R.string.search_content_desc,

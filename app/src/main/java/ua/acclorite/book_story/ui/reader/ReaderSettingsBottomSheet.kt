@@ -50,34 +50,15 @@ fun ReaderSettingsBottomSheet(
     dismissBottomSheet: (ReaderEvent.OnDismissBottomSheet) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(initialPage) { 3 }
+    val pagerState = rememberPagerState(initialPage) { 4 }
     DisposableEffect(Unit) { onDispose { initialPage = pagerState.currentPage } }
-
-    val animatedScrimColor by animateColorAsState(
-        targetValue = if (pagerState.currentPage == 2) Color.Transparent
-        else BottomSheetDefaults.ScrimColor,
-        animationSpec = tween(300)
-    )
-    val animatedHeight by animateFloatAsState(
-        targetValue = if (pagerState.currentPage == 2) 0.6f else 0.7f,
-        animationSpec = tween(300)
-    )
-
-    LaunchedEffect(pagerState.currentPage) {
-        menuVisibility(
-            ReaderEvent.OnMenuVisibility(
-                show = pagerState.currentPage != 2,
-                saveCheckpoint = false
-            )
-        )
-    }
 
     ModalBottomSheet(
         hasFixedHeight = true,
-        scrimColor = animatedScrimColor,
+        scrimColor = BottomSheetDefaults.ScrimColor,
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(animatedHeight),
+            .fillMaxHeight(0.72f),
         dragHandle = {},
         onDismissRequest = {
             dismissBottomSheet(ReaderEvent.OnDismissBottomSheet)
@@ -95,7 +76,29 @@ fun ReaderSettingsBottomSheet(
 
         HorizontalPager(state = pagerState) { page ->
             when (page) {
-                0 -> {
+                0 -> { // Tipografia
+                    LazyColumnWithScrollbar(Modifier.fillMaxSize()) {
+                        FontSubcategory(
+                            titleColor = { MaterialTheme.colorScheme.onSurface }
+                        )
+                        TextSubcategory(
+                            titleColor = { MaterialTheme.colorScheme.onSurface },
+                            showDivider = false
+                        )
+                    }
+                }
+
+                1 -> { // Cores
+                    LazyColumnWithScrollbar(Modifier.fillMaxSize()) {
+                        ColorsSubcategory(
+                            showTitle = false,
+                            showDivider = false,
+                            backgroundColor = { MaterialTheme.colorScheme.surfaceContainer }
+                        )
+                    }
+                }
+
+                2 -> { // Layout
                     LazyColumnWithScrollbar(Modifier.fillMaxSize()) {
                         ReadingModeSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface }
@@ -103,25 +106,19 @@ fun ReaderSettingsBottomSheet(
                         PaddingSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface }
                         )
-                        SystemSubcategory(
-                            titleColor = { MaterialTheme.colorScheme.onSurface }
-                        )
-                        ReadingSpeedSubcategory(
-                            titleColor = { MaterialTheme.colorScheme.onSurface }
-                        )
-                        MiscSubcategory(
+                        ProgressSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface },
                             showDivider = false
                         )
                     }
                 }
 
-                1 -> {
+                3 -> { // Mais
                     LazyColumnWithScrollbar(Modifier.fillMaxSize()) {
-                        FontSubcategory(
+                        SystemSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface }
                         )
-                        TextSubcategory(
+                        TranslatorSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface }
                         )
                         ImagesSubcategory(
@@ -130,22 +127,12 @@ fun ReaderSettingsBottomSheet(
                         ChaptersSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface }
                         )
-                        ProgressSubcategory(
+                        MiscSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface }
                         )
-                        TranslatorSubcategory(
+                        ReadingSpeedSubcategory(
                             titleColor = { MaterialTheme.colorScheme.onSurface },
                             showDivider = false
-                        )
-                    }
-                }
-
-                2 -> {
-                    LazyColumnWithScrollbar(Modifier.fillMaxSize()) {
-                        ColorsSubcategory(
-                            showTitle = false,
-                            showDivider = false,
-                            backgroundColor = { MaterialTheme.colorScheme.surfaceContainer }
                         )
                     }
                 }

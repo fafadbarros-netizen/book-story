@@ -105,7 +105,7 @@ class SettingsManager @Inject constructor(
         serialize = { it.name }, deserialize = { ThemeContrast.valueOf(it) }
     )
     val showStartScreen = setting<Boolean, Boolean>(
-        key = booleanPreferencesKey("guide"), default = true
+        key = booleanPreferencesKey("guide"), default = false
     )
     val doublePressExit = setting<Boolean, Boolean>(
         key = booleanPreferencesKey("double_press_exit"), default = false
@@ -268,7 +268,7 @@ class SettingsManager @Inject constructor(
         serialize = { it.name }, deserialize = { ReaderColorEffects.valueOf(it) }
     )
     val progressBar = setting<Boolean, Boolean>(
-        key = booleanPreferencesKey("progress_bar"), default = false
+        key = booleanPreferencesKey("progress_bar"), default = true
     )
     val progressBarPadding = setting<Int, Int>(
         key = intPreferencesKey("progress_bar_padding"), default = 4
@@ -351,6 +351,12 @@ class SettingsManager @Inject constructor(
     val browsePinnedPaths = setting<List<String>, Set<String>>(
         key = stringSetPreferencesKey("browse_pinned_paths"), default = emptyList(),
         serialize = { it.toSet() }, deserialize = { it.toList() }
+    )
+    /* - - - - - - - - - - - - - - - - - - - - - - */
+
+    /* ------ OPDS Cloud Catalog ----------------- */
+    val opdsCatalogUrl = setting<String, String>(
+        key = stringPreferencesKey("opds_catalog_url"), default = ""
     )
     /* - - - - - - - - - - - - - - - - - - - - - - */
 

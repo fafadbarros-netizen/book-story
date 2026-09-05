@@ -77,7 +77,8 @@ fun LibraryListItem(
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .width(60.dp)
+                .aspectRatio(2f / 3f)
                 .clip(MaterialTheme.shapes.small)
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
         ) {
@@ -94,7 +95,7 @@ fun LibraryListItem(
                     contentDescription = stringResource(id = R.string.cover_image_not_found_content_desc),
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .fillMaxWidth(0.7f)
+                        .fillMaxWidth(0.6f)
                         .aspectRatio(1f),
                     tint = MaterialTheme.colorScheme.surfaceContainerHigh
                 )

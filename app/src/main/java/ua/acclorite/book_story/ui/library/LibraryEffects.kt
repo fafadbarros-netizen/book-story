@@ -16,6 +16,7 @@ import ua.acclorite.book_story.presentation.book_info.BookInfoScreen
 import ua.acclorite.book_story.presentation.browse.BrowseScreen
 import ua.acclorite.book_story.presentation.history.HistoryScreen
 import ua.acclorite.book_story.presentation.library.LibraryEffect
+import ua.acclorite.book_story.presentation.opds.OpdsScreen
 import ua.acclorite.book_story.presentation.reader.ReaderScreen
 import ua.acclorite.book_story.presentation.settings.LibrarySettingsScreen
 import ua.acclorite.book_story.ui.common.helpers.showToast
@@ -58,6 +59,10 @@ fun LibraryEffects(effects: SharedFlow<LibraryEffect>, focusRequester: FocusRequ
                 is LibraryEffect.OnNavigateToReader -> {
                     HistoryScreen.insertHistoryChannel.trySend(effect.id)
                     navigator.push(ReaderScreen(effect.id))
+                }
+
+                is LibraryEffect.OnNavigateToOpdsLibrary -> {
+                    navigator.push(OpdsScreen)
                 }
             }
         }

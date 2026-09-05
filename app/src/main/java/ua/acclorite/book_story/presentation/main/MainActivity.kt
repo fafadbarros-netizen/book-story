@@ -32,14 +32,21 @@ import ua.acclorite.book_story.presentation.library.LibraryModel
 import ua.acclorite.book_story.presentation.library.LibraryScreen
 import ua.acclorite.book_story.presentation.navigator.NavigatorItem
 import ua.acclorite.book_story.presentation.navigator.StackEvent
+import ua.acclorite.book_story.presentation.opds.OpdsScreen
 import ua.acclorite.book_story.presentation.settings.SettingsModel
+import ua.acclorite.book_story.presentation.settings.SettingsScreen
 import ua.acclorite.book_story.presentation.start.StartScreen
 import ua.acclorite.book_story.ui.common.components.navigation_bar.NavigationBar
 import ua.acclorite.book_story.ui.common.components.navigation_rail.NavigationRail
 import ua.acclorite.book_story.ui.common.helpers.ProvideSettings
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import ua.acclorite.book_story.ui.main.MainActivityKeyboardManager
 import ua.acclorite.book_story.ui.navigator.Navigator
 import ua.acclorite.book_story.ui.navigator.NavigatorTabs
+import ua.acclorite.book_story.ui.opds.OpdsUrlConfigDialog
 import ua.acclorite.book_story.ui.settings.SettingsEffects
 import ua.acclorite.book_story.ui.theme.BookStoryTheme
 import ua.acclorite.book_story.ui.theme.Transitions
@@ -88,6 +95,13 @@ class MainActivity : AppCompatActivity() {
             ProvideSettings(settings) {
                 val tabs = persistentListOf(
                     NavigatorItem(
+                        screen = OpdsScreen,
+                        title = R.string.opds_screen,
+                        tooltip = R.string.opds_content_desc,
+                        selectedIcon = R.drawable.opds_screen_filled,
+                        unselectedIcon = R.drawable.opds_screen_outlined
+                    ),
+                    NavigatorItem(
                         screen = LibraryScreen,
                         title = R.string.library_screen,
                         tooltip = R.string.library_content_desc,
@@ -102,11 +116,11 @@ class MainActivity : AppCompatActivity() {
                         unselectedIcon = R.drawable.history_screen_outlined
                     ),
                     NavigatorItem(
-                        screen = BrowseScreen,
-                        title = R.string.browse_screen,
-                        tooltip = R.string.browse_content_desc,
-                        selectedIcon = R.drawable.browse_screen_filled,
-                        unselectedIcon = R.drawable.browse_screen_outlined
+                        screen = SettingsScreen,
+                        title = R.string.settings_screen,
+                        tooltip = R.string.settings_screen,
+                        selectedIcon = R.drawable.settings_screen_filled,
+                        unselectedIcon = R.drawable.settings_screen_outlined
                     )
                 )
 
@@ -119,9 +133,22 @@ class MainActivity : AppCompatActivity() {
                         isPureDark = settings.pureDark.value.isPureDark(this),
                         themeContrast = settings.themeContrast.value
                     ) {
+                        val opdsUrl = settings.opdsCatalogUrl.value
+                        var dismissInitialDialog by remember { mutableStateOf(false) }
+
+                        if (opdsUrl.isBlank() && !dismissInitialDialog) {
+                            OpdsUrlConfigDialog(
+                                currentUrl = "",
+                                onDismiss = { dismissInitialDialog = true },
+                                onSaveUrl = {
+                                    settings.opdsCatalogUrl.update(it)
+                                }
+                            )
+                        }
+
                         Navigator(
                             initialScreen = if (settings.showStartScreen.value) StartScreen
-                            else LibraryScreen,
+                            else OpdsScreen,
                             transitionSpec = { lastEvent ->
                                 when (lastEvent) {
                                     StackEvent.DEFAULT -> {
@@ -137,14 +164,14 @@ class MainActivity : AppCompatActivity() {
                             },
                             contentKey = {
                                 when (it) {
-                                    LibraryScreen, HistoryScreen, BrowseScreen -> "tabs"
+                                    OpdsScreen, LibraryScreen, HistoryScreen, SettingsScreen -> "tabs"
                                     else -> it
                                 }
                             },
                             backHandlerEnabled = { it != StartScreen }
                         ) { screen ->
                             when (screen) {
-                                LibraryScreen, HistoryScreen, BrowseScreen -> {
+                                OpdsScreen, LibraryScreen, HistoryScreen, SettingsScreen -> {
                                     NavigatorTabs(
                                         currentTab = screen,
                                         transitionSpec = {

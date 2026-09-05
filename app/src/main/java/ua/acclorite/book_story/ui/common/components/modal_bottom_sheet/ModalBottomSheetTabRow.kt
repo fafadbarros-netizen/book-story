@@ -48,7 +48,7 @@ fun ModalBottomSheetTabRow(
                 text = {
                     StyledText(
                         text = tabItem,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1
                     )
                 }

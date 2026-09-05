@@ -23,7 +23,8 @@
     <string name="fullscreen_option">Tela cheia</string>
     <string name="done">Feito</string>
     <string name="dark_theme_off">Desabilitado</string>
-    <string name="delete_books">Apagar livros?</string>
+    <string name="opds_screen">Catálogo</string>
+    <string name="opds_content_desc">Catálogo OPDS</string>
     <string name="library_screen">Biblioteca</string>
     <string name="settings_screen">Configurações</string>
     <string name="about_screen">Sobre o app</string>
@@ -65,8 +66,8 @@
     <string name="layout_grid">Grade</string>
     <string name="today">Hoje</string>
     <string name="grid_size_auto">Automático</string>
-    <string name="alignment_start">Começar</string>
-    <string name="alignment_end">Fim</string>
+    <string name="alignment_start">Início</string>
+    <string name="alignment_end">Final</string>
     <string name="dynamic_theme">Mercúrio</string>
     <string name="blue_theme">Netuno</string>
     <string name="green_theme">Terra</string>
@@ -104,9 +105,9 @@
     <string name="filter_content_desc">Filtro</string>
     <string name="delete_book_description">Isso irá apagar o livro do banco de dados. Isso não irá apagar esse livro do dispositivo.</string>
     <string name="red_gray_theme">Calisto</string>
-    <string name="general_settings_desc">Linguagem do aplicativo</string>
+    <string name="general_settings_desc">Idioma do aplicativo</string>
     <string name="appearance_settings_desc">Tema, cores</string>
-    <string name="language_option">Linguagem do aplicativo</string>
+    <string name="language_option">Idioma do aplicativo</string>
     <string name="dark_theme_option">Tema escuro</string>
     <string name="delete_history_description">Isto irá deletar todo o histórico da base de dados. Após deletá-lo, a ordem dos livros será restaurada.</string>
     <string name="paragraph_indentation_option">Recuo de parágrafo</string>
@@ -123,7 +124,7 @@
     <string name="contributors_option">Contribuidores</string>
     <string name="app_theme_option">Tema do aplicativo</string>
     <string name="color_preset_selected_query">Selecionado: «%1$s»</string>
-    <string name="theme_contrast_option">Tema constratante</string>
+    <string name="theme_contrast_option">Contraste do tema</string>
     <string name="search_field_empty">Pesquisar…</string>
     <string name="font_family_option">Família de fonte</string>
     <string name="font_style_option">Estilo da fonte</string>
@@ -152,11 +153,11 @@
     <string name="more_content_desc">Mais</string>
     <string name="file_path">Caminho</string>
     <string name="tryzub_badge">Tryzub</string>
-    <string name="start_theme_preferences">Prefêrencia de temas</string>
+    <string name="start_theme_preferences">Preferências de tema</string>
     <string name="sort_order_content_desc">Ordem de classificação</string>
     <string name="continue_reading_content_desc">Continuar a ler</string>
     <string name="go_back_content_desc">Voltar</string>
-    <string name="start_language_preferences">Prefêrencias linguísticas</string>
+    <string name="start_language_preferences">Preferências de idioma</string>
     <string name="help_translate_option">Ajude a traduzir</string>
     <string name="start_done">Está tudo pronto!</string>
     <string name="cover_image_content_desc">Imagem da capa</string>
@@ -196,7 +197,7 @@
     <string name="error_no_share_app">Nenhum aplicativo para compartilhar encontrado.</string>
     <string name="error_no_dictionary">Nenhum aplicativo de dicionário encontrado.</string>
     <string name="error_no_translator">Nenhum aplicativo tradutor encontrado.</string>
-    <string name="error_could_not_get_text">Arquivo está vazio, corrompido ou ausente. Por favor verifique o caminho, opções de varredura ou mude o arquivo o arquivo, então tente novamente.</string>
+    <string name="error_could_not_get_text">Arquivo está vazio, corrompido ou ausente. Por favor verifique o caminho, opções de varredura ou mude o arquivo, então tente novamente.</string>
     <string name="history_empty">Deixe seu último livro lido abrir as páginas para uma grande história na sua jornada de leitura</string>
     <string name="library_empty">Leia seus livros favoritos e organize-os em categorias</string>
     <string name="error_could_not_reset_cover">Não foi possível restaurar a imagem da capa.</string>
@@ -214,7 +215,7 @@
     <string name="cutout_padding_option_desc">Aplique uma margem para área de recorte</string>
     <string name="fullscreen_option_desc">Esconda as barras do sistema e as margens</string>
     <string name="absolute_dark_option_desc">Mude a cor do fundo para preto total</string>
-    <string name="fast_color_preset_change_option_desc">Deslize a barra superior para esquerda e oara direita para mudar o padrão de cores</string>
+    <string name="fast_color_preset_change_option_desc">Deslize a barra superior para esquerda ou para direita para mudar o padrão de cores</string>
     <string name="hide_bars_on_fast_scroll_option">Esconder barras ao rolar</string>
     <string name="horizontal_gesture_scroll_option">Fração de deslize</string>
     <string name="bottom_bar_padding_option">Margem da barra inferior</string>
@@ -232,7 +233,7 @@
     <string name="highlighted_reading_option_desc">Destaque o início de cada palavra</string>
     <string name="open_in_web_content_desc">Abrir no navegador</string>
     <string name="color_preset_placeholder">Nomeie o padrão…</string>
-    <string name="history_element_deleted">Elemento da história foi alterado com sucesso.</string>
+    <string name="history_element_deleted">Elemento do histórico foi excluído com sucesso.</string>
     <string name="books_deleted">Todos os livros selecionados foram apagados com sucesso.</string>
     <string name="highlighted_reading_level">nível</string>
     <string name="delete_history_element_content_desc">Apagar elemento do histórico</string>
@@ -272,7 +273,7 @@
     <string name="checkpoint_forward_content_desc">Avançar ponto-salvo</string>
     <string name="cover_image_not_found_content_desc">Imagem da capa não encontrada</string>
     <string name="credits_updates">Gerenciamento dos novos updates</string>
-    <string name="cover_reset">A imagem da capa foi redefininda com sucesso.</string>
+    <string name="cover_reset">A imagem da capa foi redefinida com sucesso.</string>
     <string name="book_moved">Esse livro foi movido com sucesso.</string>
     <string name="horizontal_gesture_inverse">Ligado (Inverso)</string>
     <string name="delete_whole_history_content_desc">Apagar o histórico inteiro</string>
@@ -328,10 +329,10 @@
     <string name="create_category">Criar categoria</string>
     <string name="default_tab">Padrão</string>
     <string name="library_settings">Biblioteca</string>
-    <string name="library_settings_desc">Categorias, aparencia e abas</string>
+    <string name="library_settings_desc">Categorias, aparência e abas</string>
     <string name="tabs_settings">Abas</string>
     <string name="categories_settings">Categorias</string>
-    <string name="library_categories_option_note">Inicialmente, livros são adicionados à categoria padrão, mas podem pertencer à outras categorias personalizadas criadas aqui. Remover a categoria daqui não irar apagar livros da Biblioteca. Segure e mova o ícone da categoria para rearranjar as categorias.</string>
+    <string name="library_categories_option_note">Inicialmente, livros são adicionados à categoria padrão, mas podem pertencer à outras categorias personalizadas criadas aqui. Remover a categoria daqui não irá apagar livros da Biblioteca. Segure e mova o ícone da categoria para rearranjar as categorias.</string>
     <string name="images_captions_option">Legendas</string>
     <string name="images_captions_option_desc">Mostrar legendas sob as imagens</string>
     <string name="read_button_option">Mostrar botão «Ler»</string>
@@ -353,4 +354,16 @@
     <string name="show_navigation_labels_option">Mostrar rótulos de navegação</string>
     <string name="show_navigation_labels_option_desc">Mostrar rótulos embaixo dos ícones na barra de navegação</string>
     <string name="select_all_books_content_desc">Selecionar todos os livros</string>
+    <string name="previous_chapter">Capítulo anterior</string>
+    <string name="next_chapter">Próximo capítulo</string>
+    <string name="step_backward">Voltar</string>
+    <string name="step_forward">Avançar</string>
+    <string name="restore_reading_position">Voltar à leitura</string>
+    <string name="theme_presets">Temas de Leitura</string>
+    <string name="theme_classic_white">Claro</string>
+    <string name="theme_warm_sepia">Sépia</string>
+    <string name="theme_soft_mint">Menta</string>
+    <string name="theme_slate_dark">Grafite</string>
+    <string name="theme_pure_black">AMOLED</string>
+    <string name="theme_midnight_blue">Noturno</string>
 </resources>

@@ -65,6 +65,7 @@ fun LibraryScaffold(
     navigateToBrowse: (LibraryEvent.OnNavigateToBrowse) -> Unit,
     navigateToBookInfo: (LibraryEvent.OnNavigateToBookInfo) -> Unit,
     navigateToReader: (LibraryEvent.OnNavigateToReader) -> Unit,
+    navigateToOpdsLibrary: (LibraryEvent.OnNavigateToOpdsLibrary) -> Unit
 ) {
     Scaffold(
         Modifier
@@ -95,7 +96,8 @@ fun LibraryScaffold(
                 clearSelectedBooks = clearSelectedBooks,
                 showMoveDialog = showMoveDialog,
                 showDeleteDialog = showDeleteDialog,
-                showFilterBottomSheet = showFilterBottomSheet
+                showFilterBottomSheet = showFilterBottomSheet,
+                navigateToOpdsLibrary = navigateToOpdsLibrary
             )
         }
     ) { paddingValues ->

@@ -7,6 +7,7 @@
 package ua.acclorite.book_story.ui.library
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -113,6 +114,12 @@ fun LibraryPager(
         }
     }
 
+    val recentlyOpenedBook = remember(books) {
+        books.map { it.data }
+            .filter { (it.lastOpened ?: 0L) > 0L }
+            .maxByOrNull { it.lastOpened ?: 0L }
+    }
+
     HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { index ->
         val category = remember(categorizedBooks, index) {
             derivedStateOf {
@@ -122,42 +129,96 @@ fun LibraryPager(
 
         Box(modifier = Modifier.fillMaxSize()) {
             DefaultTransition(visible = !isLoading) {
-                LibraryLayout(
-                    books = category.value,
-                    gridSize = gridSize,
-                    autoGridSize = autoGridSize,
-                    layout = layout
-                ) { book ->
-                    LibraryItem(
-                        book = book,
-                        layout = layout,
-                        hasSelectedItems = hasSelectedItems,
-                        titlePosition = titlePosition,
-                        readButton = readButton,
-                        showProgress = showProgress,
-                        selectBook = { select ->
-                            selectBook(
-                                LibraryEvent.OnSelectBook(
-                                    id = book.data.id,
-                                    select = select
+                if (index == 0 && recentlyOpenedBook != null && !hasSelectedItems) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        LibraryContinueReadingCard(
+                            book = recentlyOpenedBook,
+                            onContinueReading = {
+                                navigateToReader(
+                                    LibraryEvent.OnNavigateToReader(
+                                        recentlyOpenedBook.id
+                                    )
                                 )
-                            )
-                        },
-                        navigateToBookInfo = {
-                            navigateToBookInfo(
-                                LibraryEvent.OnNavigateToBookInfo(
-                                    book.data.id
+                            }
+                        )
+                        Box(modifier = Modifier.weight(1f)) {
+                            LibraryLayout(
+                                books = category.value,
+                                gridSize = gridSize,
+                                autoGridSize = autoGridSize,
+                                layout = layout
+                            ) { book ->
+                                LibraryItem(
+                                    book = book,
+                                    layout = layout,
+                                    hasSelectedItems = hasSelectedItems,
+                                    titlePosition = titlePosition,
+                                    readButton = readButton,
+                                    showProgress = showProgress,
+                                    selectBook = { select ->
+                                        selectBook(
+                                            LibraryEvent.OnSelectBook(
+                                                id = book.data.id,
+                                                select = select
+                                            )
+                                        )
+                                    },
+                                    navigateToBookInfo = {
+                                        navigateToBookInfo(
+                                            LibraryEvent.OnNavigateToBookInfo(
+                                                book.data.id
+                                            )
+                                        )
+                                    },
+                                    navigateToReader = {
+                                        navigateToReader(
+                                            LibraryEvent.OnNavigateToReader(
+                                                book.data.id
+                                            )
+                                        )
+                                    }
                                 )
-                            )
-                        },
-                        navigateToReader = {
-                            navigateToReader(
-                                LibraryEvent.OnNavigateToReader(
-                                    book.data.id
-                                )
-                            )
+                            }
                         }
-                    )
+                    }
+                } else {
+                    LibraryLayout(
+                        books = category.value,
+                        gridSize = gridSize,
+                        autoGridSize = autoGridSize,
+                        layout = layout
+                    ) { book ->
+                        LibraryItem(
+                            book = book,
+                            layout = layout,
+                            hasSelectedItems = hasSelectedItems,
+                            titlePosition = titlePosition,
+                            readButton = readButton,
+                            showProgress = showProgress,
+                            selectBook = { select ->
+                                selectBook(
+                                    LibraryEvent.OnSelectBook(
+                                        id = book.data.id,
+                                        select = select
+                                    )
+                                )
+                            },
+                            navigateToBookInfo = {
+                                navigateToBookInfo(
+                                    LibraryEvent.OnNavigateToBookInfo(
+                                        book.data.id
+                                    )
+                                )
+                            },
+                            navigateToReader = {
+                                navigateToReader(
+                                    LibraryEvent.OnNavigateToReader(
+                                        book.data.id
+                                    )
+                                )
+                            }
+                        )
+                    }
                 }
             }
 

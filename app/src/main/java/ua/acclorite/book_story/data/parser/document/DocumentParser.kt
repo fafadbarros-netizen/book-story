@@ -94,8 +94,8 @@ class DocumentParser @Inject constructor(
                         } ?: return@forEach
 
                     val alt = element.attr("alt").trim().takeIf {
-                        it.clearMarkdown().containsVisibleText()
-                    } ?: "Image"
+                        it.clearMarkdown().containsVisibleText() && !it.equals("Image", ignoreCase = true)
+                    } ?: ""
 
                     element.append("\n[[$src|$alt]]\n")
                 }
@@ -113,7 +113,7 @@ class DocumentParser @Inject constructor(
                             } == true
                         } ?: return@forEach
 
-                    val alt = "Image"
+                    val alt = ""
 
                     element.append("\n[[$src|$alt]]\n")
                 }
@@ -135,7 +135,7 @@ class DocumentParser @Inject constructor(
                         imageRegex.matches(line) -> {
                             val trimmedLine = line.removeSurrounding("[[", "]]")
                             val src = trimmedLine.substringBefore("|")
-                            val alt = "_${trimmedLine.substringAfter("|")}_"
+                            val caption = trimmedLine.substringAfter("|").trim()
 
                             val image = try {
                                 val imageEntry = imageEntries?.find { image ->
@@ -154,36 +154,67 @@ class DocumentParser @Inject constructor(
                                     imageBitmap = image
                                 )
                             )
-                            readerText.add( // Adding alternative text (caption) for image
-                                ReaderText.Text(
-                                    markdownParser.parse(alt)
+
+                            // Only add caption if it is meaningful editorial text, not generic labels
+                            val hasMeaningfulCaption = caption.isNotBlank() &&
+                                !caption.equals("Image", ignoreCase = true) &&
+                                !caption.equals("Img", ignoreCase = true) &&
+                                !caption.equals("Capa", ignoreCase = true) &&
+                                !caption.equals("Cover", ignoreCase = true) &&
+                                !caption.equals("Folha de rosto", ignoreCase = true) &&
+                                !caption.startsWith("image/", ignoreCase = true) &&
+                                !caption.endsWith(".jpg", ignoreCase = true) &&
+                                !caption.endsWith(".png", ignoreCase = true) &&
+                                !caption.endsWith(".jpeg", ignoreCase = true)
+
+                            if (hasMeaningfulCaption) {
+                                readerText.add(
+                                    ReaderText.Text(
+                                        markdownParser.parse("_${caption}_")
+                                    )
                                 )
-                            )
+                            }
                         }
 
                         line == "---" || line == "***" -> readerText.add(ReaderText.Separator)
 
                         else -> {
-                            if (
-                                !chapterAdded &&
-                                formattedLine.clearAllMarkdown().containsVisibleText() &&
-                                includeChapter
-                            ) {
-                                readerText.add(
-                                    0, ReaderText.Chapter(
-                                        title = formattedLine.clearAllMarkdown(),
-                                        nested = false
+                            val clearText = formattedLine.clearAllMarkdown().trim()
+                            val isGenericPlaceholder = clearText.equals("Image", ignoreCase = true) ||
+                                clearText.equals("Img", ignoreCase = true) ||
+                                clearText.equals("Cover", ignoreCase = true) ||
+                                clearText.equals("Capa", ignoreCase = true) ||
+                                clearText.equals("Folha de rosto", ignoreCase = true) ||
+                                clearText.equals("Title Page", ignoreCase = true) ||
+                                clearText.equals("Landmarks", ignoreCase = true) ||
+                                clearText.equals("Sumário", ignoreCase = true) ||
+                                clearText.equals("Sumario", ignoreCase = true) ||
+                                clearText.equals("Table of Contents", ignoreCase = true) ||
+                                clearText.equals("Índice", ignoreCase = true) ||
+                                clearText.equals("Indice", ignoreCase = true)
+
+                            if (!isGenericPlaceholder) {
+                                if (
+                                    !chapterAdded &&
+                                    clearText.containsVisibleText() &&
+                                    includeChapter
+                                ) {
+                                    readerText.add(
+                                        0, ReaderText.Chapter(
+                                            title = clearText,
+                                            nested = false
+                                        )
                                     )
-                                )
-                                chapterAdded = true
-                            } else if (
-                                formattedLine.clearMarkdown().containsVisibleText()
-                            ) {
-                                readerText.add(
-                                    ReaderText.Text(
-                                        line = markdownParser.parse(formattedLine)
+                                    chapterAdded = true
+                                } else if (
+                                    formattedLine.clearMarkdown().containsVisibleText()
+                                ) {
+                                    readerText.add(
+                                        ReaderText.Text(
+                                            line = markdownParser.parse(formattedLine)
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }
@@ -193,7 +224,7 @@ class DocumentParser @Inject constructor(
         yield()
 
         if (
-            readerText.filterIsInstance<ReaderText.Text>().isEmpty() ||
+            (readerText.filterIsInstance<ReaderText.Text>().isEmpty() && readerText.filterIsInstance<ReaderText.Image>().isEmpty()) ||
             (includeChapter && readerText.filterIsInstance<ReaderText.Chapter>().isEmpty())
         ) {
             return emptyList()

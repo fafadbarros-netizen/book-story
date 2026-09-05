@@ -34,6 +34,25 @@ fun LazyItemScope.ReaderLayoutTextChapter(
     highlightedReading: Boolean,
     highlightedReadingThickness: FontWeight
 ) {
+    val cleanTitle = chapter.title.trim()
+    val isGenericTitle = cleanTitle.isBlank() ||
+        cleanTitle.equals("Image", ignoreCase = true) ||
+        cleanTitle.equals("Img", ignoreCase = true) ||
+        cleanTitle.equals("Cover", ignoreCase = true) ||
+        cleanTitle.equals("Capa", ignoreCase = true) ||
+        cleanTitle.equals("Folha de rosto", ignoreCase = true) ||
+        cleanTitle.equals("Title Page", ignoreCase = true) ||
+        cleanTitle.equals("Landmarks", ignoreCase = true) ||
+        cleanTitle.equals("Sumário", ignoreCase = true) ||
+        cleanTitle.equals("Sumario", ignoreCase = true) ||
+        cleanTitle.equals("Table of Contents", ignoreCase = true) ||
+        cleanTitle.equals("Índice", ignoreCase = true) ||
+        cleanTitle.equals("Indice", ignoreCase = true)
+
+    if (isGenericTitle) {
+        return
+    }
+
     Column(
         Modifier
             .animateItem(

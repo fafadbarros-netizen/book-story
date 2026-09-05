@@ -42,7 +42,13 @@ class CachedFile(
         getFileQueryParams()
     }
     val path: String by lazy { builder?.path ?: getFilePath() }
-    val rawFile: File? by lazy { storeInCache() }
+    val rawFile: File? by lazy {
+        if (uri.scheme == "file") {
+            File(uri.path ?: path).takeIf { it.exists() } ?: storeInCache()
+        } else {
+            storeInCache()
+        }
+    }
 
     val name: String get() = builder?.name ?: queryParams.name
     val size: Long get() = builder?.size ?: queryParams.size
@@ -50,6 +56,9 @@ class CachedFile(
     val isDirectory: Boolean get() = builder?.isDirectory ?: queryParams.isDirectory
 
     fun canAccess(): Boolean {
+        if (uri.scheme == "file") {
+            return File(uri.path ?: path).exists()
+        }
         return try {
             context.contentResolver.query(uri, null, null, null, null)?.let {
                 it.close()
@@ -62,6 +71,14 @@ class CachedFile(
     }
 
     fun openInputStream(): InputStream? {
+        if (uri.scheme == "file") {
+            return try {
+                java.io.FileInputStream(File(uri.path ?: path))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
         return try {
             context.contentResolver.openInputStream(uri)
                 ?: throw Exception("Failed to open InputStream for URI: $uri")
@@ -174,6 +191,10 @@ class CachedFile(
      */
     private fun storeInCache(): File? {
         if (isDirectory) return null
+        if (uri.scheme == "file") {
+            val f = File(uri.path ?: path)
+            if (f.exists()) return f
+        }
         val cacheFile = File(context.cacheDir, UUID.randomUUID().toString())
 
         try {
@@ -296,6 +317,9 @@ class CachedFile(
     }
 
     private fun getFilePath(): String {
+        if (uri.scheme == "file") {
+            return uri.path.orEmpty()
+        }
         val tempFile = DocumentFileCompat.fromUri(context, uri)
         return tempFile?.getAbsolutePath(context)?.trimEnd('/') ?: ""
     }

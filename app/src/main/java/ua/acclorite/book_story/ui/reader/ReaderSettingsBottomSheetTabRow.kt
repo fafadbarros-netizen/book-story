@@ -17,9 +17,10 @@ fun ReaderSettingsBottomSheetTabRow(
     scrollToPage: (Int) -> Unit
 ) {
     val tabItems = listOf(
-        stringResource(id = R.string.general_tab),
-        stringResource(id = R.string.reader_tab),
-        stringResource(id = R.string.color_tab)
+        "Tipografia",
+        "Cores",
+        "Layout",
+        "Mais"
     )
 
     ModalBottomSheetTabRow(

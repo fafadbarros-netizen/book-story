@@ -153,7 +153,8 @@ object LibraryScreen : Screen, Parcelable {
             navigateToBrowse = screenModel::onEvent,
             navigateToReader = screenModel::onEvent,
             navigateToBookInfo = screenModel::onEvent,
-            navigateToLibrarySettings = screenModel::onEvent
+            navigateToLibrarySettings = screenModel::onEvent,
+            navigateToOpdsLibrary = screenModel::onEvent
         )
     }
 }

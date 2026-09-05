@@ -71,7 +71,8 @@ fun LibraryContent(
     navigateToBrowse: (LibraryEvent.OnNavigateToBrowse) -> Unit,
     navigateToBookInfo: (LibraryEvent.OnNavigateToBookInfo) -> Unit,
     navigateToReader: (LibraryEvent.OnNavigateToReader) -> Unit,
-    navigateToLibrarySettings: (LibraryEvent.OnNavigateToLibrarySettings) -> Unit
+    navigateToLibrarySettings: (LibraryEvent.OnNavigateToLibrarySettings) -> Unit,
+    navigateToOpdsLibrary: (LibraryEvent.OnNavigateToOpdsLibrary) -> Unit
 ) {
     LibraryDialog(
         dialog = dialog,
@@ -135,7 +136,8 @@ fun LibraryContent(
         refreshState = refreshState,
         navigateToBrowse = navigateToBrowse,
         navigateToBookInfo = navigateToBookInfo,
-        navigateToReader = navigateToReader
+        navigateToReader = navigateToReader,
+        navigateToOpdsLibrary = navigateToOpdsLibrary
     )
 
     LibraryBackHandler(

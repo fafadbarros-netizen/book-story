@@ -6,6 +6,7 @@
 
 package ua.acclorite.book_story.ui.browse
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import ua.acclorite.book_story.presentation.browse.model.GroupedFiles
 import ua.acclorite.book_story.presentation.browse.model.SelectableFile
@@ -32,9 +34,22 @@ fun BrowseGridLayout(
     headerContent: @Composable (header: String, pinned: Boolean) -> Unit,
     itemContent: @Composable (file: SelectableFile, files: List<SelectableFile>) -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val defaultColumns = if (isLandscape) 6 else 3
+
+    val columns = if (autoGridSize) {
+        GridCells.Fixed(defaultColumns)
+    } else {
+        val baseSize = gridSize.coerceAtLeast(1)
+        val adjustedSize = if (isLandscape) {
+            if (baseSize <= 3) baseSize * 2 else (baseSize + 2).coerceAtMost(8)
+        } else baseSize
+        GridCells.Fixed(adjustedSize)
+    }
+
     LazyVerticalGridWithScrollbar(
-        columns = if (autoGridSize) GridCells.Adaptive(170.dp)
-        else GridCells.Fixed(gridSize.coerceAtLeast(1)),
+        columns = columns,
         state = gridState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 8.dp),

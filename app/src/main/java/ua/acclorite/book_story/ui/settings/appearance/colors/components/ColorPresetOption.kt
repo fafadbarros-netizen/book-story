@@ -1,16 +1,6 @@
-/*
- * Book's Story — free and open-source Material You eBook reader.
- * Copyright (C) 2024-2026 Acclorite
- * SPDX-License-Identifier: GPL-3.0-only
- */
-
 package ua.acclorite.book_story.ui.settings.appearance.colors.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,77 +10,86 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DeleteOutline
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import sh.calvin.reorderable.ReorderableCollectionItemScope
-import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyListState
 import ua.acclorite.book_story.R
 import ua.acclorite.book_story.domain.model.reader.ColorPreset
 import ua.acclorite.book_story.presentation.settings.SettingsEvent
 import ua.acclorite.book_story.presentation.settings.SettingsModel
-import ua.acclorite.book_story.ui.common.components.common.AnimatedVisibility
-import ua.acclorite.book_story.ui.common.components.common.IconButton
 import ua.acclorite.book_story.ui.common.components.common.StyledText
-import ua.acclorite.book_story.ui.common.components.settings.ColorPickerWithTitle
 import ua.acclorite.book_story.ui.settings.components.SettingsSubcategoryTitle
-import ua.acclorite.book_story.ui.theme.FadeTransitionPreservingSpace
-import ua.acclorite.book_story.ui.theme.Transitions
+
+@Immutable
+data class CuratedTheme(
+    val titleRes: Int,
+    val backgroundColor: Color,
+    val fontColor: Color
+)
+
+val CURATED_THEMES = listOf(
+    CuratedTheme(
+        titleRes = R.string.theme_classic_white,
+        backgroundColor = Color(0xFFFFFFFF),
+        fontColor = Color(0xFF1E1E1E)
+    ),
+    CuratedTheme(
+        titleRes = R.string.theme_warm_sepia,
+        backgroundColor = Color(0xFFFBF0D9),
+        fontColor = Color(0xFF382C1E)
+    ),
+    CuratedTheme(
+        titleRes = R.string.theme_soft_mint,
+        backgroundColor = Color(0xFFE4EEE6),
+        fontColor = Color(0xFF1B2E24)
+    ),
+    CuratedTheme(
+        titleRes = R.string.theme_slate_dark,
+        backgroundColor = Color(0xFF232528),
+        fontColor = Color(0xFFE1E4E8)
+    ),
+    CuratedTheme(
+        titleRes = R.string.theme_pure_black,
+        backgroundColor = Color(0xFF000000),
+        fontColor = Color(0xFFECECEC)
+    ),
+    CuratedTheme(
+        titleRes = R.string.theme_midnight_blue,
+        backgroundColor = Color(0xFF0F172A),
+        fontColor = Color(0xFFCBD5E1)
+    )
+)
 
 @Composable
 fun ColorPresetOption(backgroundColor: Color) {
     val settingsModel = hiltViewModel<SettingsModel>()
     val state = settingsModel.state.collectAsStateWithLifecycle()
-
-    val reorderableListState = rememberReorderableLazyListState(
-        lazyListState = state.value.colorPresetListState
-    ) { from, to ->
-        settingsModel.onEvent(
-            SettingsEvent.OnReorderColorPresets(
-                from = from.index,
-                to = to.index
-            )
-        )
-    }
-    val defaultBackgroundColor = MaterialTheme.colorScheme.surface
-    val defaultFontColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val selectedPreset = state.value.selectedColorPreset
 
     Column(
         Modifier
@@ -98,336 +97,127 @@ fun ColorPresetOption(backgroundColor: Color) {
             .padding(vertical = 8.dp)
     ) {
         SettingsSubcategoryTitle(
-            title = stringResource(id = R.string.color_preset_option),
+            title = stringResource(id = R.string.theme_presets),
             padding = 18.dp
         )
+
         Spacer(modifier = Modifier.height(10.dp))
+
+        // Curated Theme Swatch Cards Row
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            state = state.value.colorPresetListState,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            contentPadding = PaddingValues(horizontal = 18.dp)
+            contentPadding = PaddingValues(horizontal = 18.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            itemsIndexed(
-                state.value.colorPresets,
-                key = { _, colorPreset -> colorPreset.id }
-            ) { index, colorPreset ->
-                ReorderableItem(
-                    state = reorderableListState,
-                    animateItemModifier = Modifier,
-                    key = colorPreset.id
+            items(CURATED_THEMES) { theme ->
+                val isSelected = remember(
+                    selectedPreset.backgroundColor,
+                    selectedPreset.fontColor,
+                    theme.backgroundColor,
+                    theme.fontColor
                 ) {
-                    ColorPresetOptionRowItem(
-                        colorPreset = colorPreset,
-                        isSelected = remember(
-                            colorPreset.isSelected,
-                            state.value.colorPresets.size
-                        ) {
-                            if (state.value.colorPresets.size > 1) {
-                                colorPreset.isSelected
-                            } else true
-                        },
-                        enableAnimation = state.value.animateColorPreset,
-                        canDrag = remember(state.value.colorPresets.size) {
-                            state.value.colorPresets.size > 1
-                        },
-                        onDragStopped = {
-                            settingsModel.onEvent(SettingsEvent.OnConfirmReorderColorPresets)
-                        },
-                        onClick = {
-                            settingsModel.onEvent(
-                                SettingsEvent.OnSelectColorPreset(
-                                    id = colorPreset.id
-                                )
+                    selectedPreset.backgroundColor.value == theme.backgroundColor.value &&
+                            selectedPreset.fontColor.value == theme.fontColor.value
+                }
+
+                ThemeCard(
+                    theme = theme,
+                    isSelected = isSelected,
+                    onClick = {
+                        val currentPreset = state.value.selectedColorPreset
+                        settingsModel.onEvent(
+                            SettingsEvent.OnUpdateColorPresetColor(
+                                id = currentPreset.id,
+                                backgroundColor = theme.backgroundColor,
+                                fontColor = theme.fontColor
                             )
-                        }
-                    )
-                }
+                        )
+                        settingsModel.onEvent(
+                            SettingsEvent.OnSelectColorPreset(currentPreset.id)
+                        )
+                    }
+                )
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp)
-                .clip(MaterialTheme.shapes.large)
-                .background(backgroundColor)
-        ) {
-            Spacer(modifier = Modifier.height(18.dp))
-
-            ColorPresetOptionConfigurationItem(
-                selectedColorPreset = state.value.selectedColorPreset,
-                canDelete = state.value.colorPresets.size > 1,
-                onDelete = {
-                    settingsModel.onEvent(
-                        SettingsEvent.OnDeleteColorPreset(
-                            id = state.value.selectedColorPreset.id
-                        )
-                    )
-                },
-                onTitleChange = {
-                    settingsModel.onEvent(
-                        SettingsEvent.OnUpdateColorPresetTitle(
-                            id = state.value.selectedColorPreset.id,
-                            title = it
-                        )
-                    )
-                },
-                onShuffle = {
-                    settingsModel.onEvent(
-                        SettingsEvent.OnShuffleColorPreset(
-                            id = state.value.selectedColorPreset.id
-                        )
-                    )
-                },
-                onAdd = {
-                    settingsModel.onEvent(
-                        SettingsEvent.OnAddColorPreset(
-                            backgroundColor = defaultBackgroundColor,
-                            fontColor = defaultFontColor
-                        )
-                    )
-                }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ColorPickerWithTitle(
-                value = state.value.selectedColorPreset.backgroundColor,
-                presetId = state.value.selectedColorPreset.id,
-                title = stringResource(id = R.string.background_color_option),
-                onValueChange = {
-                    settingsModel.onEvent(
-                        SettingsEvent.OnUpdateColorPresetColor(
-                            id = state.value.selectedColorPreset.id,
-                            backgroundColor = it,
-                            fontColor = null
-                        )
-                    )
-                }
-            )
-            ColorPickerWithTitle(
-                value = state.value.selectedColorPreset.fontColor,
-                presetId = state.value.selectedColorPreset.id,
-                title = stringResource(id = R.string.font_color_option),
-                onValueChange = {
-                    settingsModel.onEvent(
-                        SettingsEvent.OnUpdateColorPresetColor(
-                            id = state.value.selectedColorPreset.id,
-                            backgroundColor = null,
-                            fontColor = it
-                        )
-                    )
-                }
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
 
 @Composable
-private fun ReorderableCollectionItemScope.ColorPresetOptionRowItem(
-    colorPreset: ColorPreset,
+private fun ThemeCard(
+    theme: CuratedTheme,
     isSelected: Boolean,
-    canDrag: Boolean,
-    enableAnimation: Boolean,
-    onDragStopped: () -> Unit,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val title = remember(colorPreset) {
-        if (colorPreset.name.isBlank()) {
-            return@remember context.getString(
-                R.string.color_preset_query,
-                colorPreset.id.toString()
-            )
-        }
-
-        colorPreset.name
-    }
-
-    val borderColor = remember(isSelected, colorPreset.fontColor) {
-        if (!isSelected) colorPreset.fontColor.copy(0.3f)
-        else colorPreset.fontColor
-    }
-    val animatedBorderColor = animateColorAsState(
-        borderColor,
-        label = ""
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        label = "theme_card_border"
     )
 
-    val animatedBackgroundColor = animateColorAsState(
-        colorPreset.backgroundColor,
-        label = ""
-    )
-    val animatedFontColor = animateColorAsState(
-        colorPreset.fontColor,
-        label = ""
-    )
-
-    Row(
-        Modifier
-            .clip(CircleShape)
+    Surface(
+        modifier = Modifier
+            .width(105.dp)
+            .height(78.dp)
+            .clip(RoundedCornerShape(16.dp))
             .border(
-                width = 2.dp,
-                color = if (enableAnimation) animatedBorderColor.value
-                else borderColor,
-                shape = CircleShape
+                width = if (isSelected) 2.5.dp else 1.dp,
+                color = animatedBorderColor,
+                shape = RoundedCornerShape(16.dp)
             )
-            .padding(2.dp)
-            .background(animatedBackgroundColor.value, CircleShape)
-            .clickable(enabled = !isSelected) {
-                onClick()
-            }
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = theme.backgroundColor,
+        shadowElevation = if (isSelected) 4.dp else 1.dp
     ) {
-        AnimatedVisibility(
-            visible = isSelected,
-            enter = if (enableAnimation) expandHorizontally() + fadeIn()
-            else Transitions.NoEnterAnimation,
-            exit = if (enableAnimation) shrinkHorizontally() + fadeOut()
-            else Transitions.NoExitAnimation
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Done,
-                contentDescription = stringResource(id = R.string.selected_content_desc),
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(18.dp),
-                tint = colorPreset.fontColor
-            )
-        }
-
-        StyledText(
-            text = title.trim(),
-            style = MaterialTheme.typography.labelLarge.copy(
-                color = animatedFontColor.value
-            ),
-            maxLines = 1
-        )
-
-        AnimatedVisibility(
-            visible = isSelected && canDrag,
-            enter = if (enableAnimation) expandHorizontally() + fadeIn()
-            else Transitions.NoEnterAnimation,
-            exit = if (enableAnimation) shrinkHorizontally() + fadeOut()
-            else Transitions.NoExitAnimation
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.DragHandle,
-                contentDescription = stringResource(id = R.string.drag_content_desc),
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(18.dp)
-                    .longPressDraggableHandle(
-                        onDragStopped = onDragStopped
-                    ),
-                tint = colorPreset.fontColor
-            )
-        }
-    }
-}
-
-@OptIn(FlowPreview::class)
-@Composable
-private fun ColorPresetOptionConfigurationItem(
-    selectedColorPreset: ColorPreset,
-    canDelete: Boolean,
-    onDelete: () -> Unit,
-    onShuffle: () -> Unit,
-    onTitleChange: (String) -> Unit,
-    onAdd: () -> Unit
-) {
-    val title = remember(selectedColorPreset.id) {
-        mutableStateOf(selectedColorPreset.name)
-    }
-
-    LaunchedEffect(title) {
-        snapshotFlow {
-            title.value
-        }.debounce(50).collectLatest {
-            onTitleChange(it)
-        }
-    }
-
-    Row(
-        Modifier.padding(horizontal = 18.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BasicTextField(
-            value = title.value,
-            singleLine = true,
-            modifier = Modifier.weight(1f),
-            textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                lineHeight = MaterialTheme.typography.titleLarge.lineHeight,
-                fontFamily = MaterialTheme.typography.titleLarge.fontFamily
-            ),
-            onValueChange = {
-                if (it.length < 40 || it.length <= title.value.length) {
-                    title.value = it
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                KeyboardCapitalization.Sentences
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant)
-        ) { innerText ->
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.CenterStart
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                if (title.value.isEmpty()) {
-                    StyledText(
-                        text = stringResource(id = R.string.color_preset_placeholder),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        maxLines = 1
+                StyledText(
+                    text = "Aa",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = theme.fontColor,
+                        fontSize = 20.sp
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                StyledText(
+                    text = stringResource(id = theme.titleRes),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = theme.fontColor.copy(alpha = 0.85f),
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 11.sp
+                    )
+                )
+            }
+
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .align(Alignment.TopEnd),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(12.dp)
                     )
                 }
-                innerText()
             }
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        FadeTransitionPreservingSpace(visible = canDelete) {
-            IconButton(
-                modifier = Modifier.size(24.dp),
-                icon = Icons.Default.DeleteOutline,
-                contentDescription = R.string.delete_color_preset_content_desc,
-                disableOnClick = false,
-                enabled = canDelete,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ) {
-                onDelete()
-            }
-        }
-
-        IconButton(
-            modifier = Modifier.size(24.dp),
-            icon = Icons.Default.Shuffle,
-            contentDescription = R.string.shuffle_color_preset_content_desc,
-            disableOnClick = false,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        ) {
-            onShuffle()
-        }
-
-        IconButton(
-            modifier = Modifier.size(24.dp),
-            icon = Icons.Default.Add,
-            contentDescription = R.string.create_color_preset_content_desc,
-            disableOnClick = false,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        ) {
-            onAdd()
         }
     }
 }

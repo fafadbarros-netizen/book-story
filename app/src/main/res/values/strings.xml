@@ -6,10 +6,12 @@
 
 <resources>
     <!-- Basic Strings -->
-    <string name="app_name" translatable="false">Book\'s Story</string>
+    <string name="app_name" translatable="false">Clube D</string>
     <string name="default_string">Default</string>
 
     <!-- Screens -->
+    <string name="opds_screen">Cloud</string>
+    <string name="opds_content_desc">OPDS Catalog</string>
     <string name="library_screen">Library</string>
     <string name="history_screen">History</string>
     <string name="browse_screen">Browse</string>
@@ -495,6 +497,7 @@
     <string name="shuffle_color_preset_content_desc">Shuffle colors</string>
     <string name="drag_content_desc">Drag</string>
     <string name="filter_content_desc">Filter</string>
+    <string name="opds_library_content_desc">OPDS Library</string>
     <string name="checkpoint_back_content_desc">Checkpoint back</string>
     <string name="checkpoint_forward_content_desc">Checkpoint forward</string>
     <string name="chapters_content_desc">Chapters</string>
@@ -507,5 +510,17 @@
     <string name="collapse_content_desc">Collapse</string>
     <string name="remove_content_desc">Remove</string>
     <string name="note_content_desc">Note</string>
+    <string name="previous_chapter">Previous chapter</string>
+    <string name="next_chapter">Next chapter</string>
+    <string name="step_backward">Back</string>
+    <string name="step_forward">Forward</string>
+    <string name="restore_reading_position">Return to reading position</string>
+    <string name="theme_presets">Reading Themes</string>
+    <string name="theme_classic_white">Light</string>
+    <string name="theme_warm_sepia">Sepia</string>
+    <string name="theme_soft_mint">Mint</string>
+    <string name="theme_slate_dark">Dark</string>
+    <string name="theme_pure_black">AMOLED</string>
+    <string name="theme_midnight_blue">Midnight</string>
 
 </resources>

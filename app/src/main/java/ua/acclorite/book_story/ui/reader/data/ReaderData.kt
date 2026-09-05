@@ -26,6 +26,16 @@ object ReaderData {
             FontFamily.Default
         ),
         FontWithName(
+            "system_serif",
+            UIText.StringValue("Serif (Livro)"),
+            FontFamily.Serif
+        ),
+        FontWithName(
+            "system_sans",
+            UIText.StringValue("Sans-Serif"),
+            FontFamily.SansSerif
+        ),
+        FontWithName(
             "raleway",
             UIText.StringValue("Raleway"),
             provideVariableFontFamily(

@@ -86,8 +86,8 @@ class EpubTextParser @Inject constructor(
             yield()
 
             if (
-                readerText.filterIsInstance<ReaderText.Text>().isEmpty() ||
-                readerText.filterIsInstance<ReaderText.Chapter>().isEmpty()
+                readerText.isEmpty() ||
+                readerText.none { it is ReaderText.Text || it is ReaderText.Image }
             ) {
                 logE(TAG, "Could not extract text from EPUB.")
                 return emptyList()
@@ -169,44 +169,84 @@ class EpubTextParser @Inject constructor(
         val content = withContext(Dispatchers.IO) {
             zip.getInputStream(entry)
         }.bufferedReader().use { it.readText() }
+
+        val jsoupDoc = Jsoup.parse(content, Parser.htmlParser())
+
+        // Content-level check: skip standalone HTML TOC, Landmarks, or chapter lists
+        val hasTocNav = jsoupDoc.select("nav[epub:type*=toc], nav[role*=doc-toc], nav#toc, [id*=table-of-contents], [id*=sumario], [id*=landmarks]").isNotEmpty()
+        val hasLandmarksNav = jsoupDoc.select("nav[epub:type*=landmarks]").isNotEmpty()
+        val titleOrHead = (jsoupDoc.title() + " " + jsoupDoc.select("h1, h2, h3").text()).lowercase()
+        val hasTocHeading = titleOrHead.contains("sumário") ||
+            titleOrHead.contains("sumario") ||
+            titleOrHead.contains("landmarks") ||
+            titleOrHead.contains("table of contents") ||
+            titleOrHead.contains("índice") ||
+            titleOrHead.contains("indice") ||
+            titleOrHead.contains("conteúdo") ||
+            titleOrHead.contains("conteudo")
+        val linksCount = jsoupDoc.select("a[href]").size
+        val paragraphsCount = jsoupDoc.select("p").size
+        val bodyTextLength = jsoupDoc.body()?.text()?.length ?: 0
+        val isTocOrLandmarksDocument = hasTocNav ||
+            hasLandmarksNav ||
+            (hasTocHeading && linksCount >= 2) ||
+            (linksCount >= 4 && (linksCount >= paragraphsCount * 0.7 || bodyTextLength < linksCount * 45))
+
+        if (isTocOrLandmarksDocument) {
+            logI(TAG, "Skipping standalone TOC/Landmarks page: ${entry.name}")
+            return
+        }
+
         var readerText = documentParser.parseDocument(
-            document = Jsoup.parse(content, Parser.htmlParser()),
+            document = jsoupDoc,
             zipFile = zip,
             imageEntries = imageEntries,
             includeChapter = false
         ).toMutableList()
 
         // Adding chapter title from TOC if found
-        getChapterTitleFromToc(
+        val tocChapter = getChapterTitleFromToc(
             chapterSource = entry.name,
             chapterTitleMap = chapterTitleMap
-        ).apply {
-            val chapter = this ?: run {
-                val firstVisibleText = readerText.firstOrNull { line ->
-                    line is ReaderText.Text && line.line.text.containsVisibleText()
-                } as? ReaderText.Text ?: return
+        )
 
-                return@run ReaderText.Chapter(
-                    title = firstVisibleText.line.text,
-                    nested = false
-                )
-            }
+        val chapterTitle = tocChapter?.title ?: run {
+            val firstVisibleText = readerText.firstOrNull { line ->
+                line is ReaderText.Text && line.line.text.containsVisibleText()
+            } as? ReaderText.Text ?: return@run null
 
-            readerText = readerText.dropWhile { line ->
-                (line is ReaderText.Text && line.line.text.lowercase() == chapter.title.lowercase())
-            }.toMutableList()
-
-            readerText.add(
-                0,
-                chapter
-            )
+            firstVisibleText.line.text.trim()
         }
 
-        if (
-            readerText.filterIsInstance<ReaderText.Text>().isEmpty() ||
-            readerText.filterIsInstance<ReaderText.Chapter>().isEmpty()
-        ) {
-            logW(TAG, "Could not extract text from [${entry.name}].")
+        val isGenericTitle = chapterTitle.isNullOrBlank() ||
+            chapterTitle.equals("Image", ignoreCase = true) ||
+            chapterTitle.equals("Img", ignoreCase = true) ||
+            chapterTitle.equals("Cover", ignoreCase = true) ||
+            chapterTitle.equals("Capa", ignoreCase = true) ||
+            chapterTitle.equals("Folha de rosto", ignoreCase = true) ||
+            chapterTitle.equals("Title Page", ignoreCase = true) ||
+            chapterTitle.equals("Landmarks", ignoreCase = true) ||
+            chapterTitle.equals("Sumário", ignoreCase = true) ||
+            chapterTitle.equals("Sumario", ignoreCase = true) ||
+            chapterTitle.equals("Table of Contents", ignoreCase = true) ||
+            chapterTitle.equals("Índice", ignoreCase = true) ||
+            chapterTitle.equals("Indice", ignoreCase = true)
+
+        if (!chapterTitle.isNullOrBlank() && !isGenericTitle) {
+            val chapter = ReaderText.Chapter(
+                title = chapterTitle,
+                nested = tocChapter?.nested ?: false
+            )
+
+            readerText = readerText.dropWhile { line ->
+                (line is ReaderText.Text && line.line.text.lowercase().trim() == chapterTitle.lowercase())
+            }.toMutableList()
+
+            readerText.add(0, chapter)
+        }
+
+        if (readerText.isEmpty()) {
+            logW(TAG, "Could not extract text or image from [${entry.name}].")
             return
         }
 
@@ -237,6 +277,20 @@ class EpubTextParser @Inject constructor(
                     if (title.isNullOrBlank()) return@forEach
                     title.trim()
                 }
+
+            val isGenericTitle = title.equals("Image", ignoreCase = true) ||
+                title.equals("Img", ignoreCase = true) ||
+                title.equals("Cover", ignoreCase = true) ||
+                title.equals("Capa", ignoreCase = true) ||
+                title.equals("Folha de rosto", ignoreCase = true) ||
+                title.equals("Title Page", ignoreCase = true) ||
+                title.equals("Landmarks", ignoreCase = true) ||
+                title.equals("Sumário", ignoreCase = true) ||
+                title.equals("Sumario", ignoreCase = true) ||
+                title.equals("Table of Contents", ignoreCase = true) ||
+                title.equals("Índice", ignoreCase = true) ||
+                title.equals("Indice", ignoreCase = true)
+            if (isGenericTitle) return@forEach
 
             val source = navPoint.selectFirst("content")?.attr("src")?.trim()
                 .also { src -> if (src.isNullOrBlank()) return@forEach }
@@ -309,19 +363,44 @@ class EpubTextParser @Inject constructor(
                 )
             }
 
+            val guideTocHrefs = document.select("guide > reference[type*=toc], guide > reference[type*=landmarks]")
+                .map { ref -> ref.attr("href").substringBefore("#").substringAfterLast("/").lowercase() }
+                .toSet()
+
+            val manifestNavHrefs = document.select("manifest > item[properties*=nav], manifest > item[properties*=landmarks], manifest > item[properties*=toc]")
+                .map { item -> item.attr("href").substringBefore("#").substringAfterLast("/").lowercase() }
+                .toSet()
+
+            val navId = document.selectFirst("manifest > item[properties*=nav]")?.attr("id")
+
             document.select("spine > itemref").mapNotNull { itemRef ->
                 val spineId = itemRef.attr("idref")
-                val chapterSource = manifestItems[spineId]
-                    .let { src ->
-                        if (src.isNullOrBlank()) return@mapNotNull null
-                        URLDecoder.decode(
-                            src.substringAfterLast(File.separator).lowercase(),
-                            StandardCharsets.UTF_8.name()
-                        )
-                    }
+                val linear = itemRef.attr("linear")
+                if (linear.equals("no", ignoreCase = true)) return@mapNotNull null
+                if (!navId.isNullOrBlank() && spineId == navId) return@mapNotNull null
+
+                val rawHref = manifestItems[spineId] ?: return@mapNotNull null
+                val fileName = rawHref.substringBefore("#").substringAfterLast(File.separator).substringAfterLast("/").lowercase()
+
+                // Exclude standalone HTML TOC / Landmarks pages that duplicate the chapter drawer
+                val isTOC = fileName.startsWith("toc.") ||
+                    fileName.startsWith("toc_") ||
+                    fileName == "toc.xhtml" ||
+                    fileName == "toc.html" ||
+                    fileName == "nav.xhtml" ||
+                    fileName == "nav.html" ||
+                    fileName.contains("table-of-contents") ||
+                    fileName.contains("sumario") ||
+                    fileName.contains("indice") ||
+                    fileName.contains("landmarks") ||
+                    guideTocHrefs.contains(fileName) ||
+                    manifestNavHrefs.contains(fileName)
+                if (isTOC) return@mapNotNull null
+
+                val chapterSource = URLDecoder.decode(fileName, StandardCharsets.UTF_8.name())
 
                 zipEntries.find { entry ->
-                    entry.name.substringAfterLast(File.separator).lowercase() == chapterSource
+                    entry.name.substringBefore("#").substringAfterLast(File.separator).substringAfterLast("/").lowercase() == chapterSource
                 }
             }.also { entries ->
                 if (entries.isEmpty()) return@let
@@ -333,9 +412,10 @@ class EpubTextParser @Inject constructor(
 
         logW(TAG, "Could not parse OPF, manual filtering.")
         return entries().toList().filter { entry ->
-            listOf(".html", ".htm", ".xhtml").any {
-                entry.name.endsWith(it, ignoreCase = true)
-            }
+            val name = entry.name.substringAfterLast("/").lowercase()
+            val isDoc = listOf(".html", ".htm", ".xhtml").any { name.endsWith(it) }
+            val isToc = name.startsWith("toc") || name.contains("sumario") || name.contains("landmarks") || name == "nav.xhtml"
+            isDoc && !isToc
         }.sortedBy {
             it.name.filter { char -> char.isDigit() }.toBigIntegerOrNull()
         }

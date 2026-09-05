@@ -318,6 +318,10 @@ class LibraryModel @Inject constructor(
                 is LibraryEvent.OnNavigateToReader -> {
                     _effects.emit(LibraryEffect.OnNavigateToReader(event.id))
                 }
+
+                is LibraryEvent.OnNavigateToOpdsLibrary -> {
+                    _effects.emit(LibraryEffect.OnNavigateToOpdsLibrary)
+                }
             }
         }
     }

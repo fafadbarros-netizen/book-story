@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -225,6 +226,12 @@ fun ReaderLayout(
                 }
             }
 
+            val currentChapterTitle = remember(listState.firstVisibleItemIndex, text) {
+                val index = listState.firstVisibleItemIndex.coerceIn(0, (text.size - 1).coerceAtLeast(0))
+                val chapter = text.take(index + 1).filterIsInstance<ReaderText.Chapter>().lastOrNull()
+                chapter?.title.orEmpty()
+            }
+
             AnimatedVisibility(
                 visible = !showMenu && progressBar,
                 enter = slideInVertically { it } + expandVertically(),
@@ -232,6 +239,7 @@ fun ReaderLayout(
             ) {
                 ReaderProgressBar(
                     progress = progress,
+                    chapterTitle = currentChapterTitle,
                     progressBarPadding = progressBarPadding,
                     progressBarAlignment = progressBarAlignment,
                     progressBarFontSize = progressBarFontSize,

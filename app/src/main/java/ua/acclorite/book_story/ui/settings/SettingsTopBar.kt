@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import ua.acclorite.book_story.R
 import ua.acclorite.book_story.ui.common.components.common.IconButton
 import ua.acclorite.book_story.ui.common.components.common.StyledText
+import ua.acclorite.book_story.ui.navigator.LocalNavigator
 import ua.acclorite.book_story.ui.navigator.NavigatorBackIconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,14 +28,19 @@ fun SettingsTopBar(
     navigateToStart: () -> Unit,
     navigateBack: () -> Unit
 ) {
+    val navigator = LocalNavigator.current
+    val canGoBack = navigator.items.value.size > 1
+
     LargeTopAppBar(
         title = {
             StyledText(stringResource(id = R.string.settings_screen))
         },
         navigationIcon = {
-            NavigatorBackIconButton(
-                navigateBack = navigateBack
-            )
+            if (canGoBack) {
+                NavigatorBackIconButton(
+                    navigateBack = navigateBack
+                )
+            }
         },
         actions = {
             IconButton(

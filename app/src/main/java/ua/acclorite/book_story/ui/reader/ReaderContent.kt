@@ -190,6 +190,7 @@ fun ReaderContent(
             openDictionary = openDictionary,
             showSettingsBottomSheet = showSettingsBottomSheet,
             showChaptersDrawer = showChaptersDrawer,
+            scrollToChapter = scrollToChapter,
             navigateBack = navigateBack,
             navigateToBookInfo = navigateToBookInfo
         )

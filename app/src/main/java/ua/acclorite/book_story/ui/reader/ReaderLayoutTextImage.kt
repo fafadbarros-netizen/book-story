@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import ua.acclorite.book_story.domain.model.reader.ReaderText
 import ua.acclorite.book_story.ui.theme.model.HorizontalAlignment
 
@@ -30,20 +31,23 @@ fun LazyItemScope.ReaderLayoutTextImage(
     imagesWidth: Float,
     imagesColorEffects: ColorFilter?
 ) {
+    val horizontalPadding = if (imagesWidth >= 0.8f) (sidePadding * 0.2f).coerceAtLeast(0.dp) else sidePadding
+    val scaleWidth = if (imagesWidth >= 0.8f) 1f else imagesWidth
+
     Box(
         modifier = Modifier
             .animateItem(
                 fadeInSpec = null,
                 fadeOutSpec = null
             )
-            .padding(horizontal = sidePadding)
+            .padding(horizontal = horizontalPadding, vertical = 4.dp)
             .fillMaxWidth(),
         contentAlignment = imagesAlignment.alignment
     ) {
         Image(
             modifier = Modifier
                 .clip(RoundedCornerShape(imagesCornersRoundness))
-                .fillMaxWidth(imagesWidth),
+                .fillMaxWidth(scaleWidth),
             bitmap = entry.imageBitmap,
             contentDescription = null,
             colorFilter = imagesColorEffects,

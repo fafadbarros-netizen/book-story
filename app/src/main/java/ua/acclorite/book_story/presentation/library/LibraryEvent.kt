@@ -67,4 +67,6 @@ sealed class LibraryEvent {
     data class OnNavigateToReader(
         val id: Int
     ) : LibraryEvent()
+
+    data object OnNavigateToOpdsLibrary : LibraryEvent()
 }

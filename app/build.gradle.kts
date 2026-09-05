@@ -34,7 +34,7 @@ android {
 
         getByName("release") {
             isMinifyEnabled = true
-            isShrinkResources = false
+            isShrinkResources = true
 
             proguardFiles("proguard-rules.pro")
         }
@@ -164,4 +164,9 @@ dependencies {
 
     // Json
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+
+    // Network - for OPDS support
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
 }

@@ -30,6 +30,20 @@ object CachedFileCompat {
         )
     }
 
+    fun fromFile(context: Context, file: java.io.File): CachedFile {
+        return CachedFile(
+            context = context,
+            uri = Uri.fromFile(file),
+            builder = CachedFileBuilder(
+                name = file.name,
+                path = file.absolutePath,
+                size = file.length(),
+                lastModified = file.lastModified(),
+                isDirectory = file.isDirectory
+            )
+        )
+    }
+
     fun build(
         name: String? = null,
         path: String? = null,
